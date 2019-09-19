@@ -110,7 +110,7 @@ var server = http.createServer(function(request, response) {
     response.end('404: Not Found: ' + request.url);
 });
 
-server.listen(8000);
+server.listen(80);
 
 var s = soap.listen(server, '/eDocMexicoCFDI', myService, xml, function(err, res){
   console.log('Server up and ready');
