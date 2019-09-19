@@ -53,7 +53,22 @@ var myService = {
             },
             GetViewEdoc: function(request){
                 var response = {
-
+                    eDocFoiloResponse: {
+                        eDocFolioResult: {
+                            attributes: {
+                                CodEstatus : 200,
+                                Fecha: "2019-09-18T12:00:00",
+                                RfcEmisor: "XAXX010101000"
+                            },
+                            Folios: {
+                                UUID: "B2504722-E638-464D-9BBE-7E29F16BD31D",
+                                ResultStatus: "Result Status",
+                                ErrorCode: "0",
+                                ErrorDescription: "Error Description",
+                                DocData: request.DocData
+                            }
+                        }
+                    }                
                 };
                 
                 return response;
@@ -90,26 +105,29 @@ var myService = {
 };
 
 
-//http server example
+//http server
 var server = http.createServer(function(request, response) {
     response.end('404: Not Found: ' + request.url);
 });
 
-server.listen(80, '10.0.2.172');
+server.listen(8000);
 
 var s = soap.listen(server, '/eDocMexicoCFDI', myService, xml, function(err, res){
-  console.log('Server up and ready listening on port: 80');
+  console.log('Server up and ready');
 });
 
+//Logs every response and request
 s.log = function(type, data) {
     // type is 'received' or 'replied'
     console.log(type + ': ' + data);
 };
 
-s.authorizeConnection = function(req){
+//Authorize every incoming request to the server
+s.authorizeConnection = function(req, res){
     var headers = req.headers;
 
     if (!headers.authorization || headers.authorization.indexOf('Basic ') === -1) {
+        res.statusCode = 401;
         return false;
     }else {
         // verify auth credentials
@@ -118,6 +136,11 @@ s.authorizeConnection = function(req){
         var username = credentials.split(':')[0];
         var password = credentials.split(':')[1];
 
-        return (username === "sap" && password === "indicium1*");
+        if(username === "sap" && password === "indicium1*"){
+            return true;
+        }else{
+            res.statusCode = 401;
+            return false;
+        }
     }
 };
